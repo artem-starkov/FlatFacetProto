@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="header_title">Валидация моделей g{{g}}</h2>
+<form class="main_menu" method="post">
+    <h3>Выберите модель</h3>
+    <div class="tab">
+        <div class="input_group">
+            <span>НС 1 (полный датасет)</span>
+            <input name="model" value="1" class="" type="radio" required>
+        </div>
+        <div class="input_group">
+            <span>НС 2 (датасет из области видимости)</span>
+            <input name="model" value="2" class="" type="radio" required>
+        </div>
+        <div class="input_group">
+            <span>НС 3 (датасет из области видимости без незначащих омматидий)</span>
+            <input name="model" value="3" class="" type="radio" required>
+        </div>
+    </div>
+    <h3>Выберите траекторию для тестового множества</h3>
+    <div class="tab">
+        <div class="input_group">
+            <span>Движение по кругу</span>
+            <input name="case" value="1" class="" type="radio" required>
+        </div>
+        <div class="input_group">
+            <span>Диагональное движение</span>
+            <input name="case" value="2" class="" type="radio" required>
+        </div>
+        <div class="input_group">
+            <span>Горизонтальное движение</span>
+            <input name="case" value="3" class="" type="radio" required>
+        </div>
+    </div>
+    {% if info %}
+    <div class="validation_info">
+        <div class="validation_block">
+            <p><b>Расстояние</b></p>
+            <p>R2 = {{info['Distance']['R2']}}</p>
+            <p>100%-MAPE = {{info['Distance']['1-MAPE']}}</p>
+            <p>RMSE = {{info['Distance']['RMSE']}}</p>
+        </div>
+        <div class="validation_block">
+            <p><b>Азимут</b></p>
+            <p>R2 = {{info['Angle']['R2']}}</p>
+            <p>100%-MAPE = {{info['Angle']['1-MAPE']}}</p>
+            <p>RMSE = {{info['Angle']['RMSE']}}</p>
+            <p>Hit rate = {{info['Angle']['Hit rate']}}</p>
+        </div>
+    </div>
+    {% endif %}
+    <button class="menu_btn">Валидация</button>
+</form>
+
+{% endblock %}

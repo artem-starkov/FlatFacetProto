@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="header_title">Предсказание расстояния и азимута целевого объекта радиусом 5 мм</h2>
+<form class="main_menu" method="post">
+    <h3>Выберите модель</h3>
+    <div class="tab">
+        <div class="input_group">
+            <span>НС 1 (полный датасет)</span>
+            <input name="model" value="1" class="" type="radio" required>
+        </div>
+        <div class="input_group">
+            <span>НС 2 (датасет из области видимости)</span>
+            <input name="model" value="2" class="" type="radio" required>
+        </div>
+        <div class="input_group">
+            <span>НС 3 (датасет из области видимости без незначащих омматидий)</span>
+            <input name="model" value="3" class="" type="radio" required checked>
+        </div>
+    </div>
+    <h3>Введите видящие омматидии для каждого глаза (отсчет с 1 против часовой стрелки)</h3>
+    <div class="tab">
+        <div class="input_group">
+            <span>Левый глаз - от <input name="left_from" class="" value="1" required> до <input name="left_to" value="4" class="" required></span>
+        </div>
+        <div class="input_group">
+            <span>Правый глаз - от <input name="right_from" class="" value="65" required> до <input name="right_to" value="74" class="" required></span>
+        </div>
+    </div>
+    <h3>Истинные значения</h3>
+    <div class="tab">
+        <div class="input_group">
+            <span>Расстояние: <input name="r" class="" required value="259.96702"></span>
+        </div>
+        <div class="input_group">
+            <span>Азимут: <input name="fi" class="" required value="1.539734"></span>
+        </div>
+    </div>
+    {% if info %}
+    <div class="validation_info">
+        <div class="validation_block">
+            <p><b>Расстояние</b></p>
+            <p>Предсказанное значение: <b>{{info['Distance']['Value'][0][0]}}</b></p>
+            <p>Погрешность (мм) = <b>{{info['Distance']['RMSE']}}</b></p>
+            <p>100% - MAPE = <b>{{info['Distance']['1-MAPE']}}</b></p>
+        </div>
+        <div class="validation_block">
+            <p><b>Азимут</b></p>
+            <p>Предсказанное значение: <b>{{info['Angle']['Value'][0][0]}}</b></p>
+            <p>Погрешность (рад) = <b>{{info['Angle']['RMSE']}}</b></p>
+            <p>100% - MAPE = <b>{{info['Angle']['1-MAPE']}}</b></p>
+        </div>
+    </div>
+    {% endif %}
+    <button class="menu_btn">Проверить</button>
+</form>
+
+{% endblock %}

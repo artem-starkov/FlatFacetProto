@@ -1,0 +1,152 @@
+html, body{
+    margin: 0;
+    padding: 0;
+}
+
+header{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items:center;
+    padding: 10px 3%;
+    border-bottom: 1px solid #0057a6;
+}
+
+.logo_a{
+    width: 30%;
+    margin-right: 10%;
+}
+
+.logo{
+    width: 100%;
+}
+
+.header_title{
+    color: #0057a6;
+    font-weight: bold;
+    text-align:center;
+}
+
+.main_menu{
+    width: 60%;
+    margin-left: 20%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    /*align-items: center;*/
+    margin-top: 5vh;
+}
+
+.menu_btn{
+    border: 0;
+    background: #0057a6;
+    color: white;
+    text-decoration: none;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 50px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    text-align: center;
+}
+
+.input{
+    text-decoration: none;
+    padding: 10px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    text-align: center;
+}
+
+.menu_btn:hover{
+    background: #00538a;
+}
+
+.input_group{
+    display:flex;
+    flex-direction: column;
+    align-items: start;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.error_label{
+    color: red;
+}
+
+.info_label{
+    color: #0057a6;
+    margin-bottom: 20px;
+}
+
+.loading_bar{
+    width: 100%;
+    height:26px;
+    border: 2px solid #0057a6;
+
+    position: relative;
+}
+
+.bar{
+    background:#0057a6;
+    height:26px;
+    width:1%;
+    position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 1;
+   background-size: 30px 30px;
+  background-image: linear-gradient(-45deg, #fff 25%,transparent 25%,transparent 50%,#fff 50%, #fff 75%,transparent 75%,transparent);
+  animation: barberpole 2s linear infinite;
+}
+
+@keyframes barberpole {
+  from { background-position: 0 0; }
+  to   { background-position: 60px 30px; }
+}
+
+.pic{
+    width: 100%;
+    text-algn: center;
+}
+
+.flex-bar{
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+}
+
+.tab{
+    width:100%;
+    display:flex;
+    flex-direction:row;
+}
+
+.analysis_img{
+    margin-top: -50px;
+}
+
+.top_flex{
+    display:flex;
+    width:100%;
+    flex-direction:row;
+    justify-content:center;
+    height:20vh;
+}
+
+.validation_info{
+    margin-top: 20px;
+    margin-bottom: 20px;
+    display:flex;
+    flex-direction:row;
+    justify-content: space-around;
+    font-size:2.5vh;
+    border:1px solid black;
+}
+
+.validation_block{
+    display:flex;
+    flex-direction:column;
+}
