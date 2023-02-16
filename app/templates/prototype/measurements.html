@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!--h2 class="header_title">Симуляция горизонтального движения целевого объекта g=5 (проверка)</h2-->
+
+<div class="main_menu">
+    <h1 style="text-align:center;">Предсказанные результаты</h1>
+    <div style="width:100%; z-index:2; background:white;">
+        <table style="width: 100%;" cellspacing="20">
+            <tr>
+                <td class="td">r: {{r_pred}}</td>
+                <td class="td">fi: {{fi_pred}}°</td>
+            </tr>
+        </table>
+    </div>
+    <br/>
+    <h1 style="text-align:center;">Реальные значения</h1>
+    <form method="post" style="width:100%; background:white;">
+        <table style="width: 100%;" cellspacing="20">
+            <tr>
+                <td class="td">r: <input name="r" value="{{r_true}}" style="font-size:30px;"></td>
+                <td class="td">fi(°): <input name="fi" value="{{fi_true}}" style="font-size:30px;"></td>
+            </tr>
+        </table>
+        <div style="display:flex;flex-direction:row; justify-content:center; margin-top:20px;">
+            <button style="font-size:30px;" type="submit">Проверить</button>
+        </div>
+    </form>
+
+    {% if info %}
+    <div class="validation_info">
+        <div class="validation_block">
+            <p><b>Расстояние</b></p>
+            <p>Погрешность (мм) = <b>{{info['Distance']['RMSE'] |round(3)}}</b>
+                {% if r_true > r_pred %}
+                 (-)
+                {% else %}
+                 (+)
+                {% endif %}
+            </p>
+            <p>100% - MAPE = <b>{{info['Distance']['1-MAPE'] |round(3)}}</b></p>
+        </div>
+        <div class="validation_block">
+            <p><b>Азимут</b></p>
+            <p>Погрешность (°) = <b>{{(57.3 * info['Angle']['RMSE']) |round(3)}}</b>
+                {% if fi_true > fi_pred %}
+                 (-)
+                {% else %}
+                 (+)
+                {% endif %}
+            </p>
+            <p>100% - MAPE = <b>{{info['Angle']['1-MAPE'] |round(3)}}</b></p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

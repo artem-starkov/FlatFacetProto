@@ -1,5 +1,5 @@
 import math
-from app.utils.enums import TestCases
+from app.enums import TestCases
 
 
 class Generator:

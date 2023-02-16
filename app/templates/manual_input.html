@@ -2,6 +2,17 @@
 {% block content %}
 <h2 class="header_title">Предсказание расстояния и азимута целевого объекта радиусом 5 мм</h2>
 <form class="main_menu" method="post">
+    <h3>Выберите размер объектов</h3>
+    <div class="tab">
+        <div class="input_group">
+            <span>G = 10</span>
+            <input name="g" value="10" class="" type="radio" required>
+        </div>
+        <div class="input_group">
+            <span>G = 5</span>
+            <input name="g" value="5" class="" type="radio" required checked>
+        </div>
+    </div>
     <h3>Выберите модель</h3>
     <div class="tab">
         <div class="input_group">
@@ -20,34 +31,52 @@
     <h3>Введите видящие омматидии для каждого глаза (отсчет с 1 против часовой стрелки)</h3>
     <div class="tab">
         <div class="input_group">
-            <span>Левый глаз - от <input name="left_from" class="" value="1" required> до <input name="left_to" value="4" class="" required></span>
+            <span>Левый глаз - от <input name="left_from" class="" value="8" required> до <input name="left_to" value="15" class="" required></span>
         </div>
         <div class="input_group">
-            <span>Правый глаз - от <input name="right_from" class="" value="65" required> до <input name="right_to" value="74" class="" required></span>
+            <span>Правый глаз - от <input name="right_from" class="" value="52" required> до <input name="right_to" value="59" class="" required></span>
         </div>
     </div>
     <h3>Истинные значения</h3>
     <div class="tab">
         <div class="input_group">
-            <span>Расстояние: <input name="r" class="" required value="259.96702"></span>
+            <span>Расстояние: <input name="r" class="" required value="359.966487"></span>
         </div>
         <div class="input_group">
-            <span>Азимут: <input name="fi" class="" required value="1.539734"></span>
+            <span>Азимут (рад): <input name="fi_rad" class=""  value="1.53866608"></span>
+        </div>
+        <div class="input_group">
+            <span>Азимут (°): <input name="fi"></span>
         </div>
     </div>
+    {% with errors = get_flashed_messages(category_filter=["fi"]) %}
+        {% if errors %}
+            {% for msg in errors %}
+                <p><b>{{ msg }}</b></p>
+            {% endfor -%}
+        {% endif %}
+    {% endwith %}
     {% if info %}
     <div class="validation_info">
         <div class="validation_block">
             <p><b>Расстояние</b></p>
             <p>Предсказанное значение: <b>{{info['Distance']['Value'][0][0]}}</b></p>
+            <p><br></p>
             <p>Погрешность (мм) = <b>{{info['Distance']['RMSE']}}</b></p>
-            <p>100% - MAPE = <b>{{info['Distance']['1-MAPE']}}</b></p>
+            <p><br></p>
+            <p>100% - MAPE = <b>{{info['Distance']['1-MAPE'] |round(3)}}</b></p>
+            <p>Время подгрузки модели: {{info['dist_time'] |round(3)}} с</p>
+            <p>Время предсказания: {{info['dist_pred_time'] |round(3)}} с</p>
         </div>
         <div class="validation_block">
             <p><b>Азимут</b></p>
-            <p>Предсказанное значение: <b>{{info['Angle']['Value'][0][0]}}</b></p>
+            <p>Предсказанное значение (рад): <b>{{info['Angle']['Value'][0][0]}}</b></p>
+            <p>Предсказанное значение (°): <b>{{57.3 * info['Angle']['Value'][0][0]}}</b></p>
             <p>Погрешность (рад) = <b>{{info['Angle']['RMSE']}}</b></p>
-            <p>100% - MAPE = <b>{{info['Angle']['1-MAPE']}}</b></p>
+            <p>Погрешность (°) = <b>{{57.3 * info['Angle']['RMSE']}}</b></p>
+            <p>100% - MAPE = <b>{{info['Angle']['1-MAPE'] |round(3)}}</b></p>
+            <p>Время подгрузки модели: {{info['angle_time'] |round(3)}} с</p>
+            <p>Время предсказания: {{info['angle_pred_time'] |round(3)}} с</p>
         </div>
     </div>
     {% endif %}

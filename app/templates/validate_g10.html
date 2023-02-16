@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-<h2 class="header_title">Валидация моделей g{{g}}</h2>
+<h2 class="header_title">Валидация моделей G{{g}}</h2>
 <form class="main_menu" method="post">
     <h3>Выберите модель</h3>
     <div class="tab">
@@ -36,18 +36,25 @@
     <div class="validation_info">
         <div class="validation_block">
             <p><b>Расстояние</b></p>
-            <p>R2 = {{info['Distance']['R2']}}</p>
-            <p>100%-MAPE = {{info['Distance']['1-MAPE']}}</p>
-            <p>RMSE = {{info['Distance']['RMSE']}}</p>
+            <p>R2 = {{info['Distance']['R2'] |round(3)}}</p>
+            <p>100%-MAPE = {{info['Distance']['1-MAPE'] |round(3)}}</p>
+            <p>RMSE = {{info['Distance']['RMSE'] |round(3)}}</p>
+            <p><br></p>
+            <p>Время подгрузки модели: {{info['dist_time'] |round(3)}} с</p>
+            <p>Время предсказания: {{info['dist_pred_time'] |round(3)}} с</p>
         </div>
         <div class="validation_block">
             <p><b>Азимут</b></p>
-            <p>R2 = {{info['Angle']['R2']}}</p>
-            <p>100%-MAPE = {{info['Angle']['1-MAPE']}}</p>
-            <p>RMSE = {{info['Angle']['RMSE']}}</p>
-            <p>Hit rate = {{info['Angle']['Hit rate']}}</p>
+            <p>R2 = {{info['Angle']['R2'] |round(3)}}</p>
+            <p>100%-MAPE = {{info['Angle']['1-MAPE'] |round(3)}}</p>
+            <p>RMSE = {{info['Angle']['RMSE'] |round(3)}}</p>
+            <p>Hit rate = {{info['Angle']['Hit rate'] |round(3)}}</p>
+            <p>Время подгрузки модели: {{info['angle_time'] |round(3)}} с</p>
+            <p>Время предсказания: {{info['angle_pred_time'] |round(3)}} с</p>
         </div>
     </div>
+    <p>Общее время создания валидационного датасета: {{info['gen_time'] |round(3)}} с</p>
+    <p><a href="/download_data">Скачать данные в формате csv</a></p>
     {% endif %}
     <button class="menu_btn">Валидация</button>
 </form>

@@ -150,3 +150,11 @@ header{
     display:flex;
     flex-direction:column;
 }
+
+.td{
+    padding: 10px;
+    font-size: 36px;
+    font-weight: 800;
+    border: 2px solid black;
+    width: 50%;
+}
