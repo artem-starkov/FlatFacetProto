@@ -12,6 +12,7 @@ from app.utils.prototype_exceptions import *
 class PrototypeDataReceiver:
     def __int__(self, run_id):
         self._data_file = os.path.join(app.root_path, 'data', f'data-{run_id}.txt')
+        self._threshold_log = os.path.join(app.root_path, 'logs', 'threshold_logs', f'thr_log-{run_id}.txt')
 
     @abstractmethod
     def initialize(self):
@@ -22,7 +23,7 @@ class PrototypeDataReceiver:
         pass
 
     def _sleep(self):
-        time.sleep(0.05)
+        time.sleep(1)
 
     def _get_threshold_array(self, omm_num):
         arr = [0] * (omm_num * 2)
@@ -66,7 +67,7 @@ class PrototypeDataReceiver:
         precedent = [0] * (left1 - diff) + left_arr + [0] * (left2 - diff) + [0] * (right1 - diff) + right_arr + [0] * (right2 - diff)
         return precedent
 
-    def _current_precedent(self, bytes_):
+    def _current_precedent(self, bytes_, threshold=None):
         if app.config['DATA_SOURCE'] == enums.DataSource.Device:
             str_bytes = [str(x) for x in bytes_]
             with open(self._data_file, 'a') as file:
@@ -94,10 +95,14 @@ class PrototypeDataReceiver:
                 else threshold_array[i]
             cur_left_threshold = left_coeff * threshold_static if app.config['THRESHOLD_MODE'] == enums.ThresholdMode.Static \
                 else threshold_array[i]
+            if threshold:
+                cur_left_threshold, cur_right_threshold = threshold, threshold
             if i < omm_num and s > cur_left_threshold:
                 left[i] = 1
             if i >= omm_num and s > cur_right_threshold:
                 right[i - omm_num] = 1
+            # with open(self._threshold_log, 'a') as file:
+            #     file.write(f'{cur_left_threshold}\t{cur_right_threshold}\t')
 
         if bytes_[6 * omm_num + 5] == sum(bytes_[5:6 * omm_num + 5]) % 256:
             precedent = self._make_mask(left, right)
@@ -116,17 +121,25 @@ class PrototypeFileReceiver(PrototypeDataReceiver):
         super().__init__()
         self._data_file = os.path.join(app.root_path, 'data', f'data-{run_id}.txt')
         self._lines = []
+        self._threshold_log = os.path.join(app.root_path, 'logs', 'threshold_logs', f'thr_log-{run_id}.txt')
+        # with open(self._threshold_log, 'w') as file:
+        #     file.write('Threshold_left\tThreshold_right\tr\tfi\n')
 
     def initialize(self):
         filename = os.path.join(app.root_path, 'data', app.config['DATA_FILE'])
         with open(filename) as file:
             self._lines = file.readlines()
 
-    def get_data(self):
+    def get_data(self, threshold=None):
         app.logger.info(f'Started stream from file {app.config["DATA_FILE"]}.')
         for i,line in enumerate(self._lines):
             bytes_ = list(map(int, line.split(',')))
-            yield self._current_precedent(bytes_)
+            yield self._current_precedent(bytes_, threshold)
+            if threshold:
+                yield self._current_precedent(bytes_, threshold), threshold
+                threshold += 1000
+            else:
+                yield self._current_precedent(bytes_, threshold)
             self._sleep()
 
 
@@ -134,6 +147,9 @@ class PrototypeDeviceReceiver(PrototypeDataReceiver):
     def __init__(self, run_id):
         super().__init__()
         self._data_file = os.path.join(app.root_path, 'data', f'data-{run_id}.txt')
+        self._threshold_log = os.path.join(app.root_path, 'logs', 'threshold_logs', f'thr_log-{run_id}.txt')
+        # with open(self._threshold_log, 'w') as file:
+        #     file.write('Threshold_left\tThreshold_right\tr\tfi\n')
         self._ser = None
 
     def initialize(self):
@@ -141,7 +157,7 @@ class PrototypeDeviceReceiver(PrototypeDataReceiver):
         self._ser.flushInput()
         self._ser.flushOutput()
 
-    def get_data(self):
+    def get_data(self, threshold=None):
         app.logger.info(f'Started stream from port {app.config["DATA_PORT"]}. Threshold: threshold')
         while True:
             if app.config['PROTOCOL_MODE'] == enums.ProtocolType.Old:
@@ -166,5 +182,9 @@ class PrototypeDeviceReceiver(PrototypeDataReceiver):
             self._ser.flushInput()
             self._ser.flushOutput()
             bytes_ = list(bytearray(received_data))
-            yield self._current_precedent(bytes_)
+            if threshold:
+                yield self._current_precedent(bytes_, threshold), threshold
+                threshold += 1000
+            else:
+                yield self._current_precedent(bytes_, threshold)
             self._sleep()

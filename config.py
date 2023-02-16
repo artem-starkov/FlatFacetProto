@@ -10,8 +10,8 @@ class Config:
     SECRET_KEY = 'secret_key'
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'database2.db')
     SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'migrations')
-    DATA_SOURCE = DataSource.Device
-    DATA_FILE = 'data-48.txt'
+    DATA_SOURCE = DataSource.File
+    DATA_FILE = 'threshold_exp.txt'
     DATA_PORT = "COM7"
     BAUD_RATE = 921600
     THRESHOLD_MIN = 50000
@@ -20,4 +20,6 @@ class Config:
     PROTOCOL_MODE = ProtocolType.New
     EYE_ORDER = Order.RightLeft
     LEFT_THRESHOLD_COEFF = 1.5
+    INVERSE_ANGLE = False
+    START_THRESHOLD_FOR_EXP = 50000
 

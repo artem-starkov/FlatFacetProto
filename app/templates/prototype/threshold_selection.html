@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="header_title">Подбор пороговых значений</h2>
+
+<div class="main_menu">
+    <h1 style="text-align:center;"></h1>
+    <div style="position:relative;">
+        {% for item in rows %}
+            {% if item['flag'] %}
+                <div style="width:100%; height: 400px; z-index:{{loop.index0 + 2}}; position:absolute; top:0;left:0; background:white;">
+                    <table style="width: 100%;" cellspacing="20">
+                        <tr>
+                            {% for i in item %}
+                                {% if i != 'flag' and i !='threshold' %}
+                                    <td class="td">{{i}}: {{item[i]}}</td>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                    </table>
+                    <div style="display:flex;flex-direction:row; justify-content:center; margin-top:20px;align-items:center;">
+                        <p style="font-size:30px; margin-right:100px;">Текущий threshold: {{item['threshold']}}</p>
+                        <a style="font-size:30px; color:blue; cursor:pointer; padding:5px; text-decoration:none;border:1px solid blue;height:40px;" href="/stop_run/{{run_id}}/2" target="_blank"><b>Остановить</b></a>
+                    </div>
+
+                    <div style="display:flex; flex-direction:row; justify-content:flex-end; color:grey; margin-top:100px;">
+                        <label>Кадр {{loop.index0 + 1}}</label>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

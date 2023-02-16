@@ -31,11 +31,14 @@ def stream_prediction():
                                                                                            run_id=run.id))))
 
 
-@app.route('/stop_run/<run_id>')
-def stop_run(run_id):
+@app.route('/stop_run/<run_id>/<condition>')
+def stop_run(run_id, condition):
     run = Run.query.get(run_id)
     run.stop()
-    return redirect(f'/measurements/{run_id}')
+    if condition == 1:
+        return redirect(f'/measurements/{run_id}')
+    else:
+        return redirect(f'/threshold_summary/{run_id}')
 
 
 @app.route('/measurements/<run_id>', methods=['GET', 'POST'])
@@ -49,4 +52,19 @@ def measurements(run_id):
         info = validate_real_and_predicted(r_true, fi_true, run.r, run.fi)
         return render_template('prototype/measurements.html', r_pred=round(run.r, 5), fi_pred=round(run.fi * 57.3, 5),
                                info=info, r_true=r_true, fi_true=fi_true)
-# /css nn_utils prototype prototype_data_receiver enums prot+routes config
+
+
+@app.route('/threshold_summary/<run_id>', methods=['GET', 'POST'])
+def threshold_summary(run_id):
+    run = Run.query.get(run_id)
+    return render_template('prototype/threshold_summary.html', r_pred=round(run.r, 5),
+                           fi_pred=round(run.fi, 5), threshold=int(run.threshold))
+
+
+@app.route('/threshold_correction')
+def threshold_correction():
+    run = Run(status=1, r=0, fi=0, threshold=0)
+    db.session.add(run)
+    db.session.commit()
+    return Response(stream_with_context(stream_template('prototype/threshold_selection.html', run_id=run.id,
+                                                        rows=prototype.threshold_selection(g=10, run_id=run.id))))

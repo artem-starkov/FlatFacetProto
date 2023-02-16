@@ -5,6 +5,7 @@ from app.utils.prototype_data_receiver import PrototypeFileReceiver, PrototypeDe
 from app.utils.prototype_exceptions import *
 from app.models import Run
 import math
+import os
 
 
 def get_receiver(run_id):
@@ -40,6 +41,9 @@ def stream_validate(coord_case, angle_case, g, run_id):
                 zero_flag = True
                 r_pred = round(dist_model.predict([frame])[0][0], 5)
                 fi_pred = round(angle_model.predict([frame])[0][0], 5)
+                # threshold_log = os.path.join(app.root_path, 'logs', 'threshold_logs', f'thr_log-{run_id}.txt')
+                # with open(threshold_log, 'a') as file:
+                #     file.write(f'{r_pred}\t{fi_pred}\n')
                 app.logger.info(f'r: {r_pred} | fi: {fi_pred}')
                 flag = False
                 if Run.is_active(run_id):
@@ -47,6 +51,8 @@ def stream_validate(coord_case, angle_case, g, run_id):
                     flag = True
                 if coord_case == 1:
                     if angle_case == 1:
+                        if app.config['INVERSE_ANGLE']:
+                            fi_pred = math.pi - fi_pred
                         yield {'R': r_pred, 'φ': fi_pred, 'flag': flag}
                     else:
                         yield {'R': r_pred, 'φ': f'{round(fi_pred * 57.3, 5)}°', 'flag': flag}
@@ -66,6 +72,43 @@ def stream_validate(coord_case, angle_case, g, run_id):
         except Exception as e:
             print('Unknown exception: ', str(e))
 
+
+def threshold_selection(g, run_id):
+    nn_type = NNType.NN1
+    dist_model = get_model(nn_type, PredictionType.Distance, g=g)
+    angle_model = get_model(nn_type, PredictionType.Azimuth, g=g)
+    receiver = get_receiver(run_id)
+    threshold = app.config['START_THRESHOLD_FOR_EXP']
+    receiver.initialize()
+    data = receiver.get_data(threshold)
+    while Run.is_active(run_id):
+        try:
+            frame, threshold = next(data)
+            if sum(frame) <= 2:
+                yield {'R': '0.00000', 'φ': '0.00000', 'flag': False}
+            else:
+                r_pred = round(dist_model.predict([frame])[0][0], 5)
+                fi_pred = round(angle_model.predict([frame])[0][0], 5)
+                # threshold_log = os.path.join(app.root_path, 'logs', 'threshold_logs', f'thr_log-{run_id}.txt')
+                # with open(threshold_log, 'a') as file:
+                #     file.write(f'{r_pred}\t{fi_pred}\n')
+                if app.config['INVERSE_ANGLE']:
+                    fi_pred = math.pi - fi_pred
+                fi_pred = round(fi_pred * 57.3, 5)
+                flag = False
+                if Run.is_active(run_id):
+                    Run.update(run_id, r_pred, fi_pred, threshold)
+                    flag = True
+                yield {'R': r_pred, 'φ': fi_pred, 'flag': flag, 'threshold': threshold}
+        except StopIteration:
+            Run.finish(run_id)
+            break
+        except InputException as e:
+            print('Something went wrong with bytes_ check:', e.bytes_)
+        except BrightsException as e:
+            print('Something went wrong with brights, look: ', e.omm_num, e.brights)
+        except Exception as e:
+            print('Unknown exception: ', str(e))
 
 
 """ 

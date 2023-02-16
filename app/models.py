@@ -8,6 +8,7 @@ class Run(db.Model):
     fi = db.Column(db.Float)
     angle_case = db.Column(db.Integer)
     coord_case = db.Column(db.Integer)
+    threshold = db.Column(db.Float)
 
     @staticmethod
     def is_active(run_id):
@@ -15,10 +16,12 @@ class Run(db.Model):
         return run.status == 1
 
     @staticmethod
-    def update(run_id, r, fi):
+    def update(run_id, r, fi, threshold=0):
         run = Run.query.get(run_id)
         run.r = r
         run.fi = fi
+        if threshold > 0:
+            run.threshold = threshold
         db.session.commit()
 
     @staticmethod
@@ -29,4 +32,10 @@ class Run(db.Model):
 
     def stop(self):
         self.status = 0
+        db.session.commit()
+
+    @staticmethod
+    def set_threshold(run_id, threshold):
+        run = Run.query.get(run_id)
+        run.threshold = threshold
         db.session.commit()
