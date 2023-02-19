@@ -12,7 +12,7 @@ from app.utils.prototype_exceptions import *
 class PrototypeDataReceiver:
     def __int__(self, run_id):
         self._data_file = os.path.join(app.root_path, 'data', f'data-{run_id}.txt')
-        self._threshold_log = os.path.join(app.root_path, 'logs', 'threshold_logs', f'thr_log-{run_id}.txt')
+        # self._threshold_log = os.path.join(app.root_path, 'logs', 'threshold_logs', f'thr_log-{run_id}.txt')
 
     @abstractmethod
     def initialize(self):
@@ -68,52 +68,57 @@ class PrototypeDataReceiver:
         return precedent
 
     def _current_precedent(self, bytes_, threshold=None):
-        if app.config['DATA_SOURCE'] == enums.DataSource.Device:
-            str_bytes = [str(x) for x in bytes_]
-            with open(self._data_file, 'a') as file:
-                file.write(','.join(str_bytes) + '\n')
         try:
-            frame_num = bytes_[4]
-            omm_num = bytes_[3]
-            brights = bytes_[5:-1]
-        except:
-            raise InputException(bytes_)
-        s_arr = []
-        j = 0
-        threshold_array = self._get_threshold_array(omm_num)
-        left, right = [0] * omm_num, [0] * omm_num
-        threshold_static = app.config['THRESHOLD_MAX']
-        left_coeff = app.config['LEFT_THRESHOLD_COEFF']
-        for i in range(omm_num * 2):
+            if app.config['DATA_SOURCE'] == enums.DataSource.Device:
+                str_bytes = [str(x) for x in bytes_]
+                with open(self._data_file, 'a') as file:
+                    file.write(','.join(str_bytes) + '\n')
             try:
-                s = brights[j] * pow(2, 16) + brights[j + 1] * pow(2, 8) + brights[j + 2]
+                frame_num = bytes_[4]
+                omm_num = bytes_[3]
+                brights = bytes_[5:-1]
             except:
-                raise BrightsException(omm_num, brights)
-            j += 3
-            s_arr.append(s)
-            cur_right_threshold = threshold_static if app.config['THRESHOLD_MODE'] == enums.ThresholdMode.Static \
-                else threshold_array[i]
-            cur_left_threshold = left_coeff * threshold_static if app.config['THRESHOLD_MODE'] == enums.ThresholdMode.Static \
-                else threshold_array[i]
-            if threshold:
-                cur_left_threshold, cur_right_threshold = threshold, threshold
-            if i < omm_num and s > cur_left_threshold:
-                left[i] = 1
-            if i >= omm_num and s > cur_right_threshold:
-                right[i - omm_num] = 1
-            # with open(self._threshold_log, 'a') as file:
-            #     file.write(f'{cur_left_threshold}\t{cur_right_threshold}\t')
+                raise InputException(bytes_)
+            s_arr = []
+            j = 0
+            threshold_array = self._get_threshold_array(omm_num)
+            left, right = [0] * omm_num, [0] * omm_num
+            threshold_static = app.config['THRESHOLD_MAX']
+            left_coeff = app.config['LEFT_THRESHOLD_COEFF']
+            for i in range(omm_num * 2):
+                try:
+                    s = brights[j] * pow(2, 16) + brights[j + 1] * pow(2, 8) + brights[j + 2]
+                except:
+                    raise BrightsException(omm_num, brights)
+                j += 3
+                s_arr.append(s)
+                cur_right_threshold = threshold_static if app.config['THRESHOLD_MODE'] == enums.ThresholdMode.Static \
+                    else threshold_array[i]
+                cur_left_threshold = left_coeff * threshold_static if app.config['THRESHOLD_MODE'] == enums.ThresholdMode.Static \
+                    else threshold_array[i]
+                if threshold:
+                    cur_left_threshold, cur_right_threshold = threshold, threshold
+                if i < omm_num and s > cur_left_threshold:
+                    left[i] = 1
+                if i >= omm_num and s > cur_right_threshold:
+                    right[i - omm_num] = 1
+                # with open(self._threshold_log, 'a') as file:
+                #     file.write(f'{cur_left_threshold}\t{cur_right_threshold}\t')
 
-        if bytes_[6 * omm_num + 5] == sum(bytes_[5:6 * omm_num + 5]) % 256:
-            precedent = self._make_mask(left, right)
-            app.logger.info(f'Frame number: {frame_num}, brights:{brights}, mask: {s_arr}')
-        else:
-            precedent = [0] * 1476
-            app.logger.info(f' something wrong with control sum: {frame_num}, brights:{brights}, mask: {s_arr}')
-        print(len(s_arr), 'zeros' if sum(precedent) <= 2 else 'oks')
-        print('------ ', s_arr)
-        print('sorted ', sorted(s_arr)[::-1])
-        return precedent
+            if bytes_[6 * omm_num + 5] == sum(bytes_[5:6 * omm_num + 5]) % 256:
+                precedent = self._make_mask(left, right)
+                app.logger.info(f'Frame number: {frame_num}, brights:{brights}, mask: {s_arr}')
+            else:
+                precedent = [0] * 1476
+                app.logger.info(f' something wrong with control sum: {frame_num}, brights:{brights}, mask: {s_arr}')
+            print(len(s_arr), 'zeros' if sum(precedent) <= 2 else 'oks')
+            print('------ ', s_arr)
+            print('sorted ', sorted(s_arr)[::-1])
+            return precedent
+        except Exception as e:
+            print("Very unknown exception ", str(e))
+            app.logger.info("Very unknown exception " + str(e))
+            return [0] * 1476
 
 
 class PrototypeFileReceiver(PrototypeDataReceiver):
@@ -121,7 +126,7 @@ class PrototypeFileReceiver(PrototypeDataReceiver):
         super().__init__()
         self._data_file = os.path.join(app.root_path, 'data', f'data-{run_id}.txt')
         self._lines = []
-        self._threshold_log = os.path.join(app.root_path, 'logs', 'threshold_logs', f'thr_log-{run_id}.txt')
+        # self._threshold_log = os.path.join(app.root_path, 'logs', 'threshold_logs', f'thr_log-{run_id}.txt')
         # with open(self._threshold_log, 'w') as file:
         #     file.write('Threshold_left\tThreshold_right\tr\tfi\n')
 
@@ -147,7 +152,7 @@ class PrototypeDeviceReceiver(PrototypeDataReceiver):
     def __init__(self, run_id):
         super().__init__()
         self._data_file = os.path.join(app.root_path, 'data', f'data-{run_id}.txt')
-        self._threshold_log = os.path.join(app.root_path, 'logs', 'threshold_logs', f'thr_log-{run_id}.txt')
+        # self._threshold_log = os.path.join(app.root_path, 'logs', 'threshold_logs', f'thr_log-{run_id}.txt')
         # with open(self._threshold_log, 'w') as file:
         #     file.write('Threshold_left\tThreshold_right\tr\tfi\n')
         self._ser = None
