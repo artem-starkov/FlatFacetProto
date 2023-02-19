@@ -64,7 +64,7 @@ class PrototypeDataReceiver:
         left1, left2, right1, right2 = 318, 338, 338, 318
         orig_length = 82
         diff = int((len(left_arr) - orig_length) / 2)
-        precedent = [0] * (left1 - diff) + left_arr + [0] * (left2 - diff) + [0] * (right1 - diff) + right_arr + [0] * (right2 - diff)
+        precedent = [0] * (left1 - diff) + left_arr[::-1] + [0] * (left2 - diff) + [0] * (right1 - diff) + right_arr[::-1] + [0] * (right2 - diff)
         return precedent
 
     def _current_precedent(self, bytes_, threshold=None):
@@ -138,6 +138,8 @@ class PrototypeFileReceiver(PrototypeDataReceiver):
     def get_data(self, threshold=None):
         app.logger.info(f'Started stream from file {app.config["DATA_FILE"]}.')
         for i,line in enumerate(self._lines):
+            if '\n' in line:
+                line = line[:-2]
             bytes_ = list(map(int, line.split(',')))
             yield self._current_precedent(bytes_, threshold)
             if threshold:
